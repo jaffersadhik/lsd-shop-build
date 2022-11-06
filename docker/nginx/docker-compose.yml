@@ -1,0 +1,19 @@
+version: '3.6'
+services:
+  nc-nginx:
+    networks:
+      - docker_default 
+    image: registry.docker.hub/lsd-shop/nc-nginx-lsd:latest
+    container_name: lsd-nginx
+    restart: unless-stopped
+    labels:
+       - com.docker.stack.namespace=lsd
+    environment:
+       - CONSUL=lsd-consul:8500
+    ports:
+       - '80:80'
+       - '443:443'
+       - '10380:80'
+networks:
+  docker_default:
+    external: true

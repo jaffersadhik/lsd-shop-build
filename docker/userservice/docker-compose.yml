@@ -1,0 +1,26 @@
+version: '3.6'
+services:
+  nc-user-lsd:
+     labels:
+        - com.docker.stack.namespace=lsd
+     ports:
+      #   - '10312:8000'
+        - '10383:10383'
+     environment:
+        - 'SPRING_PROFILES_ACTIVE=dev,docker'
+        - 'JAVA_OPTS=-Xmx512m
+-Dspring.cloud.config.uri=http://lsd-config:10390
+-Dfluentd.host=lsd-fluentd -Dfluentd.port=10326'
+        - 'WAIT_FOR=lsd-db:10332 lsd-config:10390 lsd-auth:10384
+lsd-idp:10385'
+        - HEALTH_CONFIG_ENABLED=true
+     container_name: lsd-user
+     image: 'registry.docker.hub/lsd-shop/nc-user-lsd:latest'
+     volumes:
+         - /etc/localtime:/etc/timezone:ro
+     networks:    
+       - docker_default
+networks:
+  docker_default:
+    external: true
+

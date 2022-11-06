@@ -1,0 +1,22 @@
+version: '3.6'
+services:
+   nc-prd:
+    networks:
+      - docker_default
+    image: registry.gitlab.com/ltstandards/lsd-shop/nc-prd-lsd
+    container_name: lsd-product
+    restart: unless-stopped
+    labels:
+       - com.docker.stack.namespace=lsd
+    ports:
+       - '10399:10399'
+    environment:
+       - 'JAVA_OPTS=-Xmx256m -Dspring.cloud.config.uri=http://lsd-config:10390 -Dfluentd.host=lsd-fluentd -Dfluentd.port=10326'
+       - 'WAIT_FOR=lsd-config:10390 lsd-auth:10384'
+       - HEALTH_CONFIG_ENABLED=false
+
+  
+networks:
+  docker_default:
+    external: true
+

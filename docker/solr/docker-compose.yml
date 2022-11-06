@@ -1,0 +1,18 @@
+version: '3.6'
+services:
+  nc-solr:
+    networks:
+      - docker_default 
+    image: registry.gitlab.com/evelopmentd/lsd-shop/nc-solr-lsd
+    container_name: lsd-solr
+    restart: unless-stopped
+    labels:
+       - com.docker.stack.namespace=lsd
+    ports:
+       - '10310:10310'
+       - '8983:8983'
+    environment:
+        - 'SOLR_PORT=10310'
+networks:
+  docker_default:
+    external: true
