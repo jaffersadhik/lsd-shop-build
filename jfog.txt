@@ -1,0 +1,10 @@
+mkdir -p artifactory/var/etc/
+cd artifactory/var/etc/
+touch ./system.yaml
+chown -R 1030:1030 artifactory/var
+
+
+chmod -R 777 artifactory/var
+
+
+docker run --name artifactory -d -v /home/ec2-user/jfrog/artifactory/var:/var/opt/jfrog/artifactory -d -p 8081:8081 -p 8082:8082 releases-docker.jfrog.io/jfrog/artifactory-pro:latest
