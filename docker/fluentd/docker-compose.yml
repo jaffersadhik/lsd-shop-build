@@ -1,0 +1,22 @@
+version: '3.6'
+services:
+  nc-fluentd-base:
+    networks:
+      - docker_default
+    image: registry.gitlab.com/ltstandards/lsd-shop/nc-fluentd-base
+    container_name: lsd-fluentd
+    volumes:
+       - /etc/timezone:/etc/timezone:ro
+    restart: unless-stopped
+    labels:
+       - com.docker.stack.namespace=lsd
+    ports:
+       - '10326:10326'
+    environment:
+       - MONGO_HOST=lsd-mongo
+       - FLUENTD_PORT=10326
+       - MONGO_PORT=10327
+networks:
+  docker_default:
+    external: true
+

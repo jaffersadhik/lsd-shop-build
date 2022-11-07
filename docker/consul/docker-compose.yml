@@ -1,0 +1,33 @@
+version: '3.6'
+services:
+  nc-consul:
+     networks:
+        - docker_default
+     labels:
+        - com.docker.stack.namespace=lsd
+     command: "-server -bootstrap-expect 1 -ui-dir /ui"
+     ports:
+        - '8300:8300'
+        - '8301:8301'
+        - '8302:8302'
+        - '8400:8400'
+        - '8500:8500'
+        - '8600:8600'
+        - '53:53'
+        - '10300:10300'
+     environment:
+        - 'SPRING_PROFILES_ACTIVE=dev,docker'
+        - 'JAVA_OPTS=-Xmx512m
+-Dspring.cloud.config.uri=http://lsd-config:10390
+-Dfluentd.host=lsd-fluentd -Dfluentd.port=10326'
+        - 'WAIT_FOR=lsd-db:10332 lsd-config:10390 lsd-auth:10384'
+        - HEALTH_CONFIG_ENABLED=false
+     container_name: lsd-consul
+     image: 'progrium/consul:latest'
+     volumes:
+        - /etc/localtime:/etc/timezone:ro
+
+networks:
+  docker_default:
+    external: true
+

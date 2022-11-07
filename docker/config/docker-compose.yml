@@ -1,0 +1,32 @@
+version: '3.6'
+services:
+  nc-config-base:
+    networks:
+      - docker_default
+    image: registry.gitlab.com/ltstandards/lsd-shop/nc-config-base
+   #  image: thinkbig-base-config
+    container_name: lsd-config
+    restart: unless-stopped
+    volumes:
+        - /etc/localtime:/etc/timezone:ro
+    labels:
+        - com.docker.stack.namespace=lsd
+    ports:
+        - '10390:10390'
+    environment:
+        - 'SPRING_PROFILES_ACTIVE=dev,docker'
+        - 'JAVA_OPTS=-Xmx512m -Dserver.port=10390
+-Dspring.cloud.consul.host=lsd-consul
+-Dspring.cloud.config.server.git.uri=https://gitlab.com/ltstandards/lsd-shop.git
+-Dfluentd.host=lsd-fluentd -Dfluentd.port=10326'
+        - 'WAIT_FOR=lsd-fluentd:10326'
+        - HEALTH_CONFIG_ENABLED=false
+        - SERVER_PORT=10390
+        - SPRING_CLOUD_CONFIG_SERVER_GIT_USERNAME=deimoz
+        - SPRING_CLOUD_CONFIG_SERVER_GIT_PASSWORD=Penislovas69
+
+  
+networks:
+  docker_default:
+    external: true
+
