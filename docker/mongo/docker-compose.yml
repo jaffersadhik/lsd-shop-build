@@ -9,10 +9,8 @@ services:
     ports:
       - 10327:10327 
     volumes:
-      - mongodb_data_container:/data/db
+      - /home/data/lsdshop/mongo:/data/db
 networks:
   docker_default:
     external: true
-volumes:
-  mongodb_data_container:      
 

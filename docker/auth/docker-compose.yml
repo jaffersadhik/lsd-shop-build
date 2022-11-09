@@ -1,0 +1,24 @@
+version: '3.6'
+services:
+  nc-auth-lsd:
+     networks:
+       - docker_default
+     labels:
+        - com.docker.stack.namespace=lsd
+     ports:
+      #   - '10312:8000'
+        - '10384:10384'
+     environment:
+        - 'SPRING_PROFILES_ACTIVE=dev,docker'
+        - 'JAVA_OPTS=-Xmx512m
+-Dspring.cloud.config.uri=http://lsd-config:10390
+-Dfluentd.host=lsd-fluentd -Dfluentd.port=10326'
+        - 'WAIT_FOR=lsd-db:10332 lsd-config:10390'
+        - HEALTH_CONFIG_ENABLED=true
+     container_name: lsd-auth
+     image: 'registry.gitlab.com/evelopmentd/lsd-shop/nc-auth-lsd'
+     volumes:
+         - /etc/localtime:/etc/timezone:ro
+networks:
+  docker_default:
+    external: true         
