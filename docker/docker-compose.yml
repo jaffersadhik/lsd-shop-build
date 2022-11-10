@@ -121,7 +121,7 @@ services:
          - STORAGE_ENGINE=wiredTiger
       image: mongo
       volumes:
-         - ./lsd/mongo:/data/db
+         - /home/data/lsdshop/mongo:/data/db
          - /etc/localtime:/etc/timezone:ro
 
   nc-auth-lsd:
