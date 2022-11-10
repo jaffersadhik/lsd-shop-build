@@ -1,0 +1,374 @@
+version: '3.6'
+services:
+  nc-fluentd-base:
+    image: registry.gitlab.com/evelopmentd/lsd-shop/nc-fluentd-base
+    container_name: lsd-fluentd
+    volumes:
+       - /etc/timezone:/etc/timezone:ro
+    restart: unless-stopped
+    labels:
+       - com.docker.stack.namespace=lsd
+    ports:
+       - '10326:10326'
+    environment:
+       - MONGO_HOST=lsd-mongo
+       - FLUENTD_PORT=10326
+       - MONGO_PORT=10327
+
+  
+
+  nc-config-base:
+    image: registry.gitlab.com/evelopmentd/lsd-shop/nc-config-base
+   #  image: thinkbig-base-config
+    container_name: lsd-config
+    restart: unless-stopped
+    volumes:
+        - /etc/localtime:/etc/timezone:ro
+    labels:
+        - com.docker.stack.namespace=lsd
+    ports:
+        - '10390:10390'
+    environment:
+        - 'SPRING_PROFILES_ACTIVE=dev,docker'
+        - 'JAVA_OPTS=-Xmx512m -Dserver.port=10390
+-Dspring.cloud.consul.host=lsd-consul
+-Dspring.cloud.config.server.git.uri=https://gitlab.com/evelopmentd/lsd-shop.git
+-Dfluentd.host=lsd-fluentd -Dfluentd.port=10326'
+        - 'WAIT_FOR=lsd-fluentd:10326'
+        - HEALTH_CONFIG_ENABLED=false
+        - SERVER_PORT=10390
+        - SPRING_CLOUD_CONFIG_SERVER_GIT_USERNAME=deimoz
+        - SPRING_CLOUD_CONFIG_SERVER_GIT_PASSWORD=Penislovas69
+
+  nc-log-base:
+    image: registry.gitlab.com/evelopmentd/lsd-shop/nc-log-base
+    container_name: lsd-log
+    restart: unless-stopped
+    volumes:
+        - /etc/localtime:/etc/timezone:ro
+    labels:
+        - com.docker.stack.namespace=lsd
+    ports:
+        - '10302:8000'
+        - '10382:10382'
+    environment:
+        - 'SPRING_PROFILES_ACTIVE=dev,docker'
+        - 'JAVA_OPTS=-Xmx256m
+-Dspring.cloud.config.uri=http://lsd-config:10390
+-Dfluentd.host=lsd-fluentd -Dfluentd.port=10326'
+        - 'WAIT_FOR=lsd-mongo:10327 lsd-config:10390 lsd-auth:10384'
+        - HEALTH_CONFIG_ENABLED=false
+
+  nc-menu-base:
+     labels:
+        - com.docker.stack.namespace=lsd
+     ports:
+        - '10312:8000'
+        - '10392:10392'
+     environment:
+        - 'SPRING_PROFILES_ACTIVE=dev,docker'
+        - 'JAVA_OPTS=-Xmx512m
+-Dspring.cloud.config.uri=http://lsd-config:10390
+-Dfluentd.host=lsd-fluentd -Dfluentd.port=10326'
+        - 'WAIT_FOR=lsd-db:10332 lsd-config:10390 lsd-auth:10384'
+        - HEALTH_CONFIG_ENABLED=false
+     container_name: lsd-menu
+     image: 'registry.gitlab.com/evelopmentd/lsd-shop/nc-menu-base:latest'
+     volumes:
+         - /etc/localtime:/etc/timezone:ro
+
+  nc-consul:
+     labels:
+        - com.docker.stack.namespace=lsd
+     command: "-server -bootstrap-expect 1 -ui-dir /ui"
+     ports:
+        - '8300:8300'
+        - '8301:8301'
+        - '8302:8302'
+        - '8400:8400'
+        - '8500:8500'
+        - '8600:8600'
+        - '53:53'
+        - '10300:10300'
+     environment:
+        - 'SPRING_PROFILES_ACTIVE=dev,docker'
+        - 'JAVA_OPTS=-Xmx512m
+-Dspring.cloud.config.uri=http://lsd-config:10390
+-Dfluentd.host=lsd-fluentd -Dfluentd.port=10326'
+        - 'WAIT_FOR=lsd-db:10332 lsd-config:10390 lsd-auth:10384'
+        - HEALTH_CONFIG_ENABLED=false
+     container_name: lsd-consul
+     image: 'progrium/consul:latest'
+     volumes:
+        - /etc/localtime:/etc/timezone:ro
+
+  redis:
+      container_name: lsd-redis
+      command: redis-server --port 10361
+      ports:
+         - '10361:10361'
+      image: redis
+      volumes:
+         - /etc/localtime:/etc/timezone:ro
+
+  mongo:
+      labels:
+        - com.docker.stack.namespace=lsd
+      container_name: lsd-mongo
+      ports:
+         - '10327:10327'
+      environment:
+         - STORAGE_ENGINE=wiredTiger
+      image: mongo
+      volumes:
+         - /home/data/lsdshop/mongo:/data/db
+         - /etc/localtime:/etc/timezone:ro
+
+  nc-auth-lsd:
+     labels:
+        - com.docker.stack.namespace=lsd
+     ports:
+      #   - '10312:8000'
+        - '10384:10384'
+     environment:
+        - 'SPRING_PROFILES_ACTIVE=dev,docker'
+        - 'JAVA_OPTS=-Xmx512m
+-Dspring.cloud.config.uri=http://lsd-config:10390
+-Dfluentd.host=lsd-fluentd -Dfluentd.port=10326'
+        - 'WAIT_FOR=lsd-db:10332 lsd-config:10390'
+        - HEALTH_CONFIG_ENABLED=true
+     container_name: lsd-auth
+     image: 'registry.gitlab.com/evelopmentd/lsd-shop/nc-auth-lsd'
+     volumes:
+         - /etc/localtime:/etc/timezone:ro
+
+  nc-doc-lsd:
+     labels:
+        - com.docker.stack.namespace=lsd
+     ports:
+      #   - '10312:8000'
+        - '10389:10389'
+     environment:
+        - 'SPRING_PROFILES_ACTIVE=dev,docker'
+        - 'JAVA_OPTS=-Xmx512m
+-Dspring.cloud.config.uri=http://lsd-config:10390
+-Dfluentd.host=lsd-fluentd -Dfluentd.port=10326'
+        - 'WAIT_FOR=lsd-db:10332 lsd-config:10390 lsd-auth:10384
+lsd-idp:10385'
+        - HEALTH_CONFIG_ENABLED=true
+     container_name: lsd-doc
+     image: 'registry.gitlab.com/evelopmentd/lsd-shop/nc-doc-lsd'
+     volumes:
+         - /etc/localtime:/etc/timezone:ro
+
+  nc-conv-lsd:
+     labels:
+        - com.docker.stack.namespace=lsd
+     ports:
+      #   - '10312:8000'
+        - '10388:10388'
+     environment:
+        - 'SPRING_PROFILES_ACTIVE=dev,docker'
+        - 'JAVA_OPTS=-Xmx512m
+-Dspring.cloud.config.uri=http://lsd-config:10390
+-Dfluentd.host=lsd-fluentd -Dfluentd.port=10326'
+        - 'WAIT_FOR=lsd-db:10332 lsd-config:10390 lsd-auth:10384
+lsd-idp:10385'
+        - HEALTH_CONFIG_ENABLED=true
+     container_name: lsd-conv
+     image: 'registry.gitlab.com/evelopmentd/lsd-shop/nc-conv-lsd'
+     volumes:
+         - /etc/localtime:/etc/timezone:ro
+
+  nc-idp-lsd:
+     labels:
+        - com.docker.stack.namespace=lsd
+     ports:
+      #   - '10312:8000'
+        - '10385:10385'
+     environment:
+        - 'SPRING_PROFILES_ACTIVE=dev,docker'
+        - 'JAVA_OPTS=-Xmx512m
+-Dspring.cloud.config.uri=http://lsd-config:10390
+-Dfluentd.host=lsd-fluentd -Dfluentd.port=10326'
+        - 'WAIT_FOR=lsd-db:10332 lsd-config:10390 lsd-auth:10384'
+        - HEALTH_CONFIG_ENABLED=true
+     container_name: lsd-idp
+     image: 'registry.gitlab.com/evelopmentd/lsd-shop/nc-idp-lsd'
+     volumes:
+         - /etc/localtime:/etc/timezone:ro
+
+  nc-file-lsd:
+     labels:
+        - com.docker.stack.namespace=lsd
+     ports:
+      #   - '10312:8000'
+        - '10394:10394'
+     environment:
+        - 'SPRING_PROFILES_ACTIVE=dev,docker'
+        - 'JAVA_OPTS=-Xmx512m
+-Dspring.cloud.config.uri=http://lsd-config:10390
+-Dfluentd.host=lsd-fluentd -Dfluentd.port=10326'
+        - 'WAIT_FOR=lsd-db:10332 lsd-config:10390 lsd-auth:10384
+lsd-idp:10385'
+        - HEALTH_CONFIG_ENABLED=true
+     container_name: lsd-file
+     image: 'registry.gitlab.com/evelopmentd/lsd-shop/nc-file-lsd'
+     volumes:
+         - /etc/localtime:/etc/timezone:ro
+
+  nc-mail-lsd:
+     labels:
+        - com.docker.stack.namespace=lsd
+     ports:
+      #   - '10312:8000'
+        - '10387:10387'
+     environment:
+        - 'SPRING_PROFILES_ACTIVE=dev,docker'
+        - 'JAVA_OPTS=-Xmx512m
+-Dspring.cloud.config.uri=http://lsd-config:10390
+-Dfluentd.host=lsd-fluentd -Dfluentd.port=10326'
+        - 'WAIT_FOR=lsd-db:10332 lsd-config:10390 lsd-auth:10384
+lsd-idp:10385'
+        - HEALTH_CONFIG_ENABLED=true
+     container_name: lsd-mail
+     image: 'registry.gitlab.com/evelopmentd/lsd-shop/nc-mail-lsd'
+     volumes:
+         - /etc/localtime:/etc/timezone:ro
+
+  nc-settings-lsd:
+     labels:
+        - com.docker.stack.namespace=lsd
+     ports:
+      #   - '10312:8000'
+        - '10386:10386'
+     environment:
+        - 'SPRING_PROFILES_ACTIVE=dev,docker'
+        - 'JAVA_OPTS=-Xmx512m
+-Dspring.cloud.config.uri=http://lsd-config:10390
+-Dfluentd.host=lsd-fluentd -Dfluentd.port=10326'
+        - 'WAIT_FOR=lsd-db:10332 lsd-config:10390 lsd-auth:10384
+lsd-idp:10385'
+        - HEALTH_CONFIG_ENABLED=true
+     container_name: lsd-settings
+     image: 'registry.gitlab.com/evelopmentd/lsd-shop/nc-settings-lsd'
+     volumes:
+         - /etc/localtime:/etc/timezone:ro
+
+  nc-web-lsd:
+     labels:
+        - com.docker.stack.namespace=lsd
+     ports:
+      #   - '10312:8000'
+        - '10381:10381'
+     environment:
+        - 'SPRING_PROFILES_ACTIVE=dev,docker'
+        - 'JAVA_OPTS=-Xmx512m
+-Dspring.cloud.config.uri=http://lsd-config:10390
+-Dfluentd.host=lsd-fluentd -Dfluentd.port=10326'
+        - 'WAIT_FOR=lsd-db:10332 lsd-config:10390 lsd-auth:10384
+lsd-idp:10385'
+        - HEALTH_CONFIG_ENABLED=true
+     container_name: lsd-web
+     image: 'registry.gitlab.com/evelopmentd/lsd-shop/nc-web-lsd'
+     volumes:
+         - /etc/localtime:/etc/timezone:ro
+
+  nc-report-lsd:
+     labels:
+        - com.docker.stack.namespace=lsd
+     ports:
+      #   - '10312:8000'
+        - '10391:10391'
+     environment:
+        - 'SPRING_PROFILES_ACTIVE=dev,docker'
+        - 'JAVA_OPTS=-Xmx512m
+-Dspring.cloud.config.uri=http://lsd-config:10390
+-Dfluentd.host=lsd-fluentd -Dfluentd.port=10326'
+        - 'WAIT_FOR=lsd-db:10332 lsd-config:10390 lsd-auth:10384
+lsd-idp:10385'
+        - HEALTH_CONFIG_ENABLED=true
+     container_name: lsd-report
+     image: 'registry.gitlab.com/evelopmentd/lsd-shop/nc-report-lsd'
+     volumes:
+         - /etc/localtime:/etc/timezone:ro
+
+  nc-shed-lsd:
+     labels:
+        - com.docker.stack.namespace=lsd
+     ports:
+      #   - '10312:8000'
+        - '10397:10397'
+     environment:
+        - 'SPRING_PROFILES_ACTIVE=dev,docker'
+        - 'JAVA_OPTS=-Xmx512m
+-Dspring.cloud.config.uri=http://lsd-config:10390
+-Dfluentd.host=lsd-fluentd -Dfluentd.port=10326'
+        - 'WAIT_FOR=lsd-db:10332 lsd-config:10390 lsd-auth:10384
+lsd-idp:10385'
+        - HEALTH_CONFIG_ENABLED=true
+     container_name: lsd-shed
+     image: 'registry.gitlab.com/evelopmentd/lsd-shop/nc-shed-lsd'
+     volumes:
+         - /etc/localtime:/etc/timezone:ro
+
+  nc-survey-lsd:
+     labels:
+        - com.docker.stack.namespace=lsd
+     ports:
+      #   - '10312:8000'
+        - '10393:10393'
+     environment:
+        - 'SPRING_PROFILES_ACTIVE=dev,docker'
+        - 'JAVA_OPTS=-Xmx512m
+-Dspring.cloud.config.uri=http://lsd-config:10390
+-Dfluentd.host=lsd-fluentd -Dfluentd.port=10326'
+        - 'WAIT_FOR=lsd-db:10332 lsd-config:10390 lsd-auth:10384
+lsd-idp:10385'
+        - HEALTH_CONFIG_ENABLED=true
+     container_name: lsd-survey
+     image: 'registry.gitlab.com/evelopmentd/lsd-shop/nc-survey-lsd'
+     volumes:
+         - /etc/localtime:/etc/timezone:ro
+
+  nc-trade-lsd:
+     labels:
+        - com.docker.stack.namespace=lsd
+     ports:
+      #   - '10312:8000'
+        - '10395:10395'
+     environment:
+        - 'SPRING_PROFILES_ACTIVE=dev,docker'
+        - 'JAVA_OPTS=-Xmx512m
+-Dspring.cloud.config.uri=http://lsd-config:10390
+-Dfluentd.host=lsd-fluentd -Dfluentd.port=10326'
+        - 'WAIT_FOR=lsd-db:10332 lsd-config:10390 lsd-auth:10384
+lsd-idp:10385'
+        - HEALTH_CONFIG_ENABLED=true
+     container_name: lsd-trade
+     image: 'registry.gitlab.com/evelopmentd/lsd-shop/nc-trade-lsd'
+     volumes:
+         - /etc/localtime:/etc/timezone:ro
+
+  nc-db-lsd:
+     labels:
+        - com.docker.stack.namespace=lsd
+     ports:
+      #   - '10312:8000'
+        - '10332:10332'
+     environment:
+        - 'SPRING_PROFILES_ACTIVE=dev,docker'
+        - 'JAVA_OPTS=-Xmx512m
+-Dspring.cloud.config.uri=http://lsd-config:10390
+-Dfluentd.host=lsd-fluentd -Dfluentd.port=10326'
+        - HEALTH_CONFIG_ENABLED=true
+        - 'POSTGRES_USER=postgres'
+        - 'POSTGRES_PASSWORD=postgres'
+     container_name: lsd-db
+     image: 'registry.gitlab.com/evelopmentd/lsd-shop:latest'
+     volumes:
+         - /etc/localtime:/etc/timezone:ro
+networks:
+  lsdnw:
+    external: true
+

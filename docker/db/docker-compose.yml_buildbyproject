@@ -1,0 +1,26 @@
+version: '3.6'
+services:
+  nc-db-lsd:
+     networks:
+             - docker_default      
+     labels:
+        - com.docker.stack.namespace=lsd
+     ports:
+      #   - '10312:8000'
+        - '10332:10332'
+     environment:
+        - 'SPRING_PROFILES_ACTIVE=dev,docker'
+        - 'JAVA_OPTS=-Xmx512m
+-Dspring.cloud.config.uri=http://lsd-config:10390
+-Dfluentd.host=lsd-fluentd -Dfluentd.port=10326'
+        - HEALTH_CONFIG_ENABLED=true
+        - 'POSTGRES_USER=postgres'
+        - 'POSTGRES_PASSWORD=postgres'
+     container_name: lsd-db
+     image: 'lsd-db:latest'
+     volumes:
+         - /etc/localtime:/etc/timezone:ro
+         - /home/data/pdshoppostgres:/var/lib/postgresql/data
+networks:
+  docker_default:
+    external: true 
