@@ -1,7 +1,7 @@
 version: '3.6'
 services:
   nc-fluentd-base:
-    image: registry.gitlab.com/ltstandards/lsd-shop/nc-fluentd-base
+    image: registry.gitlab.com/evelopmentd/lsd-shop/nc-fluentd-base
     container_name: lsd-fluentd
     volumes:
        - /etc/timezone:/etc/timezone:ro
@@ -18,7 +18,7 @@ services:
   
 
   nc-config-base:
-    image: registry.gitlab.com/ltstandards/lsd-shop/nc-config-base
+    image: registry.gitlab.com/evelopmentd/lsd-shop/nc-config-base
    #  image: thinkbig-base-config
     container_name: lsd-config
     restart: unless-stopped
@@ -32,7 +32,7 @@ services:
         - 'SPRING_PROFILES_ACTIVE=dev,docker'
         - 'JAVA_OPTS=-Xmx512m -Dserver.port=10390
 -Dspring.cloud.consul.host=lsd-consul
--Dspring.cloud.config.server.git.uri=https://gitlab.com/ltstandards/lsd-shop.git
+-Dspring.cloud.config.server.git.uri=https://gitlab.com/evelopmentd/lsd-shop.git
 -Dfluentd.host=lsd-fluentd -Dfluentd.port=10326'
         - 'WAIT_FOR=lsd-fluentd:10326'
         - HEALTH_CONFIG_ENABLED=false
@@ -41,7 +41,7 @@ services:
         - SPRING_CLOUD_CONFIG_SERVER_GIT_PASSWORD=Penislovas69
 
   nc-log-base:
-    image: registry.gitlab.com/ltstandards/lsd-shop/nc-log-base
+    image: registry.gitlab.com/evelopmentd/lsd-shop/nc-log-base
     container_name: lsd-log
     restart: unless-stopped
     volumes:
@@ -73,7 +73,7 @@ services:
         - 'WAIT_FOR=lsd-db:10332 lsd-config:10390 lsd-auth:10384'
         - HEALTH_CONFIG_ENABLED=false
      container_name: lsd-menu
-     image: 'registry.gitlab.com/ltstandards/lsd-shop/nc-menu-base:latest'
+     image: 'registry.gitlab.com/evelopmentd/lsd-shop/nc-menu-base:latest'
      volumes:
          - /etc/localtime:/etc/timezone:ro
 
@@ -138,7 +138,7 @@ services:
         - 'WAIT_FOR=lsd-db:10332 lsd-config:10390'
         - HEALTH_CONFIG_ENABLED=true
      container_name: lsd-auth
-     image: 'registry.gitlab.com/ltstandards/lsd-shop/nc-auth-lsd'
+     image: 'registry.gitlab.com/evelopmentd/lsd-shop/nc-auth-lsd'
      volumes:
          - /etc/localtime:/etc/timezone:ro
 
@@ -157,7 +157,7 @@ services:
 lsd-idp:10385'
         - HEALTH_CONFIG_ENABLED=true
      container_name: lsd-doc
-     image: 'registry.gitlab.com/ltstandards/lsd-shop/nc-doc-lsd'
+     image: 'registry.gitlab.com/evelopmentd/lsd-shop/nc-doc-lsd'
      volumes:
          - /etc/localtime:/etc/timezone:ro
 
@@ -176,7 +176,7 @@ lsd-idp:10385'
 lsd-idp:10385'
         - HEALTH_CONFIG_ENABLED=true
      container_name: lsd-conv
-     image: 'registry.gitlab.com/ltstandards/lsd-shop/nc-conv-lsd'
+     image: 'registry.gitlab.com/evelopmentd/lsd-shop/nc-conv-lsd'
      volumes:
          - /etc/localtime:/etc/timezone:ro
 
@@ -194,7 +194,7 @@ lsd-idp:10385'
         - 'WAIT_FOR=lsd-db:10332 lsd-config:10390 lsd-auth:10384'
         - HEALTH_CONFIG_ENABLED=true
      container_name: lsd-idp
-     image: 'registry.gitlab.com/ltstandards/lsd-shop/nc-idp-lsd'
+     image: 'registry.gitlab.com/evelopmentd/lsd-shop/nc-idp-lsd'
      volumes:
          - /etc/localtime:/etc/timezone:ro
 
@@ -213,7 +213,7 @@ lsd-idp:10385'
 lsd-idp:10385'
         - HEALTH_CONFIG_ENABLED=true
      container_name: lsd-file
-     image: 'registry.gitlab.com/ltstandards/lsd-shop/nc-file-lsd'
+     image: 'registry.gitlab.com/evelopmentd/lsd-shop/nc-file-lsd'
      volumes:
          - /etc/localtime:/etc/timezone:ro
 
@@ -232,7 +232,7 @@ lsd-idp:10385'
 lsd-idp:10385'
         - HEALTH_CONFIG_ENABLED=true
      container_name: lsd-mail
-     image: 'registry.gitlab.com/ltstandards/lsd-shop/nc-mail-lsd'
+     image: 'registry.gitlab.com/evelopmentd/lsd-shop/nc-mail-lsd'
      volumes:
          - /etc/localtime:/etc/timezone:ro
 
@@ -251,7 +251,7 @@ lsd-idp:10385'
 lsd-idp:10385'
         - HEALTH_CONFIG_ENABLED=true
      container_name: lsd-settings
-     image: 'registry.gitlab.com/ltstandards/lsd-shop/nc-settings-lsd'
+     image: 'registry.gitlab.com/evelopmentd/lsd-shop/nc-settings-lsd'
      volumes:
          - /etc/localtime:/etc/timezone:ro
 
@@ -270,7 +270,7 @@ lsd-idp:10385'
 lsd-idp:10385'
         - HEALTH_CONFIG_ENABLED=true
      container_name: lsd-web
-     image: 'registry.gitlab.com/ltstandards/lsd-shop/nc-web-lsd'
+     image: 'registry.gitlab.com/evelopmentd/lsd-shop/nc-web-lsd'
      volumes:
          - /etc/localtime:/etc/timezone:ro
 
@@ -289,7 +289,7 @@ lsd-idp:10385'
 lsd-idp:10385'
         - HEALTH_CONFIG_ENABLED=true
      container_name: lsd-report
-     image: 'registry.gitlab.com/ltstandards/lsd-shop/nc-report-lsd'
+     image: 'registry.gitlab.com/evelopmentd/lsd-shop/nc-report-lsd'
      volumes:
          - /etc/localtime:/etc/timezone:ro
 
@@ -308,7 +308,7 @@ lsd-idp:10385'
 lsd-idp:10385'
         - HEALTH_CONFIG_ENABLED=true
      container_name: lsd-shed
-     image: 'registry.gitlab.com/ltstandards/lsd-shop/nc-shed-lsd'
+     image: 'registry.gitlab.com/evelopmentd/lsd-shop/nc-shed-lsd'
      volumes:
          - /etc/localtime:/etc/timezone:ro
 
@@ -327,7 +327,7 @@ lsd-idp:10385'
 lsd-idp:10385'
         - HEALTH_CONFIG_ENABLED=true
      container_name: lsd-survey
-     image: 'registry.gitlab.com/ltstandards/lsd-shop/nc-survey-lsd'
+     image: 'registry.gitlab.com/evelopmentd/lsd-shop/nc-survey-lsd'
      volumes:
          - /etc/localtime:/etc/timezone:ro
 
@@ -346,7 +346,7 @@ lsd-idp:10385'
 lsd-idp:10385'
         - HEALTH_CONFIG_ENABLED=true
      container_name: lsd-trade
-     image: 'registry.gitlab.com/ltstandards/lsd-shop/nc-trade-lsd'
+     image: 'registry.gitlab.com/evelopmentd/lsd-shop/nc-trade-lsd'
      volumes:
          - /etc/localtime:/etc/timezone:ro
 

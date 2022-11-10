@@ -1,0 +1,18 @@
+version: '3.6'
+services:
+  lsd-registry:
+    networks:
+      - docker_default 
+    image: mvo/artifactory-oss:v1 
+    container_name: lsd-registry
+    restart: unless-stopped
+    labels:
+       - com.docker.stack.namespace=lsd
+    ports:
+       - '8081:8081'
+       - '8082:8082'
+    volumes:
+      - /media/artifactory:/var/opt/jfrog/artifactory   
+networks:
+  docker_default:
+    external: true
